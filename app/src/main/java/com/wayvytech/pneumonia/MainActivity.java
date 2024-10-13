@@ -14,8 +14,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import com.samueldeveloper.dogbreed120.R;
-import com.samueldeveloper.dogbreed120.ml.Model;
+
+import com.wayvytech.pneumonia.R;
+
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 import java.io.IOException;
