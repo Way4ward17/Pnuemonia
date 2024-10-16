@@ -1,4 +1,4 @@
-package com.samueldeveloper.dogbreed120;
+package com.wayvytech.pneumonia;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.wayvytech.pneumonia.R;
+import com.wayvytech.pneumonia.ml.Model;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
@@ -30,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView imageView;
     TextView result, level, details, right, fact;
     ImageView clickhere, dogImage;
-    int imageSize = 224;
+    int imageSize = 256;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
             Model model = Model.newInstance(getApplicationContext());
 
             // Creates inputs for reference.
-            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{224, 224, 3}, DataType.FLOAT32);
+            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{256, 256, 3}, DataType.FLOAT32);
             ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * imageSize * imageSize * 3);
             byteBuffer.order(ByteOrder.nativeOrder());
 
@@ -67,9 +68,9 @@ public class MainActivity extends AppCompatActivity {
             for(int i = 0; i < imageSize; i ++){
                 for(int j = 0; j < imageSize; j++){
                     int val = intValues[pixel++]; // RGB
-                    byteBuffer.putFloat(((val >> 16) & 0xFF) * (1.f / 225));
-                    byteBuffer.putFloat(((val >> 8) & 0xFF) * (1.f / 225));
-                    byteBuffer.putFloat((val & 0xFF) * (1.f / 225));
+                    byteBuffer.putFloat(((val >> 16) & 0xFF) * (1.f / 255));
+                    byteBuffer.putFloat(((val >> 8) & 0xFF) * (1.f / 255));
+                    byteBuffer.putFloat((val & 0xFF) * (1.f / 255));
 
 
                 }
@@ -102,7 +103,8 @@ public class MainActivity extends AppCompatActivity {
                 confidences[maxPos] = Integer.MIN_VALUE;
 
             }
-            String[] classes = {"Affenpinscher","Afghan_Hound","African_Hunting_Dog","Airedale","American_Staffordshire_Terrier","Appenzeller","Australian_Terrier","Basenji","Basset","Beagle","Bedlington_terrier","Bernese_Mountain_Dog","Black-And-Tan_Coonhound","Blenheim_spaniel","Bloodhound","Bluetick","Border_Collie","Border_Terrier","Borzoi","Boston_Bull","Bouvier_Des_Flandres","Boxer","Brabancon_Griffon","Briard","Brittany_spaniel","Bull_mastiff","Cairn","Cardigan","Chesapeake_Bay_retriever","Chihuahua","Chow","Clumber","Cocker_spaniel","Collie","Curly-Coated_Retriever","Dhole","Dingo","Dinmont","Doberman","English_Foxhound","English_setter","English_Sheepdog","English_Springer","EntleBucher","Eskimo","Flat-coated_Retriever","French_Bulldog","German_Shepherd","German_short-haired_Pointer","Giant_Schnauzer","Golden_Retriever","Gordon_Setter","Great_Dane","Great_Pyrenees","Greater_Swiss_Mountain_Dog","Groenendael","Ibizan_Hound","Irish_Setter","Irish_Terrier","Irish_Water_Spaniel","Irish_Wolfhound","Italian_Greyhound","Japanese_Spaniel","Keeshond","Kelpie","Kerry_Blue_Terrier","Komondor","Kuvasz","Labrador_Retriever","Lakeland_Terrier","Leonberg","Lhasa","Malamute","Malinois","Maltese_Dog","Mexican_Hairless","Miniature_Pinscher","Miniature_Poodle","Miniature_Schnauzer","Newfoundland","Norfolk_Terrier","Norwegian_Elkhound","Norwich_Terrier","Otterhound","Papillon","Pekinese","Pembroke","Pomeranian","Pug","Redbone","Rhodesian_Ridgeback","Rottweiler","Saint_Bernard","Saluki","Samoyed","Schipperke","Scotch_Terrier","Scottish_Deerhound","Sealyham_Terrier","Shetland_Sheepdog","Shih-Tzu","Siberian_Husky","Silky_Terrier","Soft-coated_Wheaten_Terrier","Staffordshire_Bullterrier","Standard_Poodle","Standard_Schnauzer","Sussex_Spaniel","Tibetan_Mastiff","Tibetan_Terrier","Toy_Poodle","Toy_Terrier","Vizsla","Walker_Hound","Weimaraner","Welsh_Springer_Spaniel","West_Highland_White_Terrier","Whippet","Wire-haired_Fox_Terrier","Yorkshire_Terrier"};
+            String[] classes = {"NORMAL","PNEUMONIA"};
+                    //er","Saint_Bernard","Saluki","Samoyed","Schipperke","Scotch_Terrier","Scottish_Deerhound","Sealyham_Terrier","Shetland_Sheepdog","Shih-Tzu","Siberian_Husky","Silky_Terrier","Soft-coated_Wheaten_Terrier","Staffordshire_Bullterrier","Standard_Poodle","Standard_Schnauzer","Sussex_Spaniel","Tibetan_Mastiff","Tibetan_Terrier","Toy_Poodle","Toy_Terrier","Vizsla","Walker_Hound","Weimaraner","Welsh_Springer_Spaniel","West_Highland_White_Terrier","Whippet","Wire-haired_Fox_Terrier","Yorkshire_Terrier"};
 
             double value = large[0] * 100;
             int valueFinal = (int)value;
