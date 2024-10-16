@@ -1,4 +1,4 @@
-package com.samueldeveloper.dogbreed120;
+package com.wayvytech.pneumonia;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
