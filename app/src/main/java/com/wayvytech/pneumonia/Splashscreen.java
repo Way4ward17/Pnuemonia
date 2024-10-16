@@ -1,4 +1,4 @@
-package com.samueldeveloper.dogbreed120;
+package com.wayvytech.pneumonia;
 
 import android.content.Intent;
 import android.os.Bundle;
