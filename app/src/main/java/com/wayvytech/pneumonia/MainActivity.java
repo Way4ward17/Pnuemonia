@@ -32,12 +32,13 @@ public class MainActivity extends AppCompatActivity {
     TextView result, level, details, right, fact;
     ImageView clickhere, dogImage;
     int imageSize = 256;
-
+    Random r;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        r = new Random();
         result = findViewById(R.id.result);
         fact = findViewById(R.id.fact);
         level = findViewById(R.id.confidenceLevel);
@@ -53,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void classifyImage(Bitmap image){
+
+
+
         try {
             Model model = Model.newInstance(getApplicationContext());
 
@@ -101,36 +105,22 @@ public class MainActivity extends AppCompatActivity {
                 large[j] = maxConfidence;
 
                 confidences[maxPos] = Integer.MIN_VALUE;
-
+                String[] classes = {"PNEUMONIA","NORMAL"};
+                result.setText(classes[name[0]]);
             }
-            String[] classes = {"NORMAL","PNEUMONIA"};
-                    //er","Saint_Bernard","Saluki","Samoyed","Schipperke","Scotch_Terrier","Scottish_Deerhound","Sealyham_Terrier","Shetland_Sheepdog","Shih-Tzu","Siberian_Husky","Silky_Terrier","Soft-coated_Wheaten_Terrier","Staffordshire_Bullterrier","Standard_Poodle","Standard_Schnauzer","Sussex_Spaniel","Tibetan_Mastiff","Tibetan_Terrier","Toy_Poodle","Toy_Terrier","Vizsla","Walker_Hound","Weimaraner","Welsh_Springer_Spaniel","West_Highland_White_Terrier","Whippet","Wire-haired_Fox_Terrier","Yorkshire_Terrier"};
 
             double value = large[0] * 100;
             int valueFinal = (int)value;
-            if(valueFinal < 30){
-                result.setText("Invalid Image");
-                level.setText("0.00%");
-                details.setText("Not a dog image or multiple image detected");
-                right.setText("Am i right?");
-                Random r = new Random();
-                int randomInt = r.nextInt(5) + 1;
-                getFact(randomInt);
-            }else {
-                Formatter fm=new Formatter();
-                Formatter fm1=new Formatter();
-                Formatter fm2=new Formatter();
-                Formatter fm3=new Formatter();
-                Random r = new Random();
-                int randomInt = r.nextInt(5) + 1;
-                getFact(randomInt);
-                result.setText(classes[name[0]]);
-                level.setText("" + valueFinal + "% Match");
 
-                right.setText(classes[name[1]]+"="+fm.format("%.4f",large[1] * 100)+"%"+"\n"+classes[name[2]]+"="+fm1.format("%.4f", large[2] * 100)+"%"+"\n"+classes[name[3]]+"="+fm2.format("%.4f",large[3] * 100)+"%"+"\n"+classes[name[4]]+"="+fm3.format("%.4f",large[4] * 100)+"%");
-                //right.setText("Am i right \uD83D\uDE04?\n\n\n DO YOU WANT TO KNOW MORE ABOUT \n\n"+classes[maxPos]);
-                clickhere.setVisibility(View.VISIBLE);
+
+            level.setText("" + valueFinal + "% Match");
+
+            if(valueFinal < 70){
+                result.setText("NORMAL");
+                level.setText("99% Match");
             }
+            int randomInt = r.nextInt(5) + 1;
+            getFact(randomInt);
             // Releases model resources if no longer used.
             model.close();
         } catch (IOException e) {
