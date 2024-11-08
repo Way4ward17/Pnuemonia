@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ResultActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/top"
+        android:background="@color/purple_700"
+        android:orientation="horizontal"
+        android:layout_height="50dp">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:padding="10dp"
+            android:onClick="back"
+            android:src="@drawable/ic_baseline_keyboard_backspace_24"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:text="DOG SCANNER"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:layout_height="match_parent"/>
+
+    </LinearLayout>
+
+   <WebView
+       android:layout_below="@id/top"
+       android:layout_width="match_parent"
+       android:id="@+id/webview"
+       android:layout_centerInParent="true"
+       android:layout_height="match_parent"/>
+
+
+    <ProgressBar
+        android:layout_width="20dp"
+        android:layout_centerInParent="true"
+        android:id="@+id/progressbar"
+        android:layout_height="20dp"/>
+</RelativeLayout>
