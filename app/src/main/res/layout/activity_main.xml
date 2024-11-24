@@ -157,6 +157,7 @@
                     android:text="Fact About Pneumonia 📣📣"
                     android:textColor="@color/white"
                     android:textStyle="bold"
+                    android:layout_gravity="center"
                     android:gravity="center_horizontal"
                     android:layout_height="wrap_content"/>
 
@@ -165,6 +166,8 @@
                     android:id="@+id/fact"
                     android:layout_margin="10dp"
                     android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:gravity="center_horizontal"
                     android:textColor="@color/white"
                     android:layout_height="match_parent"/>
 
