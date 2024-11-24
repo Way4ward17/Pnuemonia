@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -50,82 +52,78 @@ public class MainActivity extends AppCompatActivity {
         Random r = new Random();
         int randomInt = r.nextInt(5) + 1;
         getFact(randomInt);
+
+
     }
 
 
-    public void classifyImage(Bitmap image){
-
-
-
+    public void classifyImage(Bitmap image) {
         try {
+            // Initialize the model
             Model model = Model.newInstance(getApplicationContext());
-
-            // Creates inputs for reference.
-            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{256, 256, 3}, DataType.FLOAT32);
+            // Create inputs for reference
+            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 256, 256, 3}, DataType.FLOAT32);
             ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * imageSize * imageSize * 3);
             byteBuffer.order(ByteOrder.nativeOrder());
 
+            // Resize the image if necessary
+            Bitmap resizedImage = Bitmap.createScaledBitmap(image, imageSize, imageSize, true);
+
             int[] intValues = new int[imageSize * imageSize];
-            image.getPixels(intValues, 0, image.getWidth(), 0, 0, image.getWidth(), image.getHeight());
+            resizedImage.getPixels(intValues, 0, resizedImage.getWidth(), 0, 0, resizedImage.getWidth(), resizedImage.getHeight());
+
             int pixel = 0;
-            //iterate over each pixel and extract R, G, and B values. Add those values individually to the byte buffer.
-            for(int i = 0; i < imageSize; i ++){
-                for(int j = 0; j < imageSize; j++){
+            for (int i = 0; i < imageSize; i++) {
+                for (int j = 0; j < imageSize; j++) {
                     int val = intValues[pixel++]; // RGB
-                    byteBuffer.putFloat(((val >> 16) & 0xFF) * (1.f / 255));
-                    byteBuffer.putFloat(((val >> 8) & 0xFF) * (1.f / 255));
-                    byteBuffer.putFloat((val & 0xFF) * (1.f / 255));
-
-
+                    byteBuffer.putFloat(((val >> 16) & 0xFF) * (1.f / 255)); // R
+                    byteBuffer.putFloat(((val >> 8) & 0xFF) * (1.f / 255));  // G
+                    byteBuffer.putFloat((val & 0xFF) * (1.f / 255));         // B
                 }
             }
-            Log.d("shape", byteBuffer.toString());
-            Log.d("shape", inputFeature0.getBuffer().toString());
+
             inputFeature0.loadBuffer(byteBuffer);
 
-            // Runs model inference and gets result.
+            // Run model inference and get results
             Model.Outputs outputs = model.process(inputFeature0);
             TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
 
-            float[] confidences = outputFeature0.getFloatArray();
-            // find the index of the class with the biggest confidence.
-            float maxConfidence;
-            int maxPos = 0;
-            float large[] = new float[5];
-            int name[] = new int[5];
-            for (int j = 0; j < 5; j++) {
-                maxConfidence = confidences[0];
-                for (int i = 0; i < confidences.length; i++) {
-                    if (confidences[i] > maxConfidence) {
-                        maxConfidence = confidences[i];
-                        maxPos = i;
-                        name[j] = i;
-                    }
-                }
-                large[j] = maxConfidence;
+            //float[] confidences = outputFeature0.getFloatArray();
+            float[] results = outputFeature0.getFloatArray();
+            String classificationResult = interpretResult(results);
+            result.setText(classificationResult);
 
-                confidences[maxPos] = Integer.MIN_VALUE;
-                String[] classes = {"PNEUMONIA","NORMAL"};
-                result.setText(classes[name[0]]);
-            }
-
-            double value = large[0] * 100;
-            int valueFinal = (int)value;
-
-
-            level.setText("" + valueFinal + "% Match");
-
-            if(valueFinal < 70){
-                result.setText("NORMAL");
-                level.setText("99% Match");
-            }
-            int randomInt = r.nextInt(5) + 1;
+            Random r = new Random();
+            int randomInt = r.nextInt(13) + 1;
             getFact(randomInt);
-            // Releases model resources if no longer used.
             model.close();
         } catch (IOException e) {
-            // TODO Handle the exception
+            e.printStackTrace();
         }
+    }
+
+    private String interpretResult(float[] results) {
+        // Handle invalid output cases
+        if (results.length < 1) {
+            return "Invalid model output";
+        }
+
+        // Handle binary classification outputs
+        if (results.length == 1) {
+            float pneumoniaProb = results[0];
+            float normalProb = 1 - pneumoniaProb; // Complementary probability
+            return pneumoniaProb > 0.5
+                    ? String.format("Prediction: Pneumonia (%.2f%%)", pneumoniaProb * 100)
+                    : String.format("Prediction: Normal (%.2f%%)", normalProb * 100);
+        } else if (results.length == 2) {
+            float normalProb = results[0];
+            float pneumoniaProb = results[1];
+            return normalProb > pneumoniaProb
+                    ? String.format("Prediction: Normal (%.2f%%)", normalProb * 100)
+                    : String.format("Prediction: Pneumonia (%.2f%%)", pneumoniaProb * 100);
+        }
+
+        return "Invalid model output structure";
     }
 
     @Override
@@ -188,31 +186,46 @@ public class MainActivity extends AppCompatActivity {
 
     private void getFact(int i){
         if(i == 1){
-            fact.setText("A dog’s nose print is unique, much like a person’s fingerprint");
+            fact.setText("Pneumonia is an infection of the lung");
         }else if(i == 2){
-            fact.setText("Speaking of sleeping … all dogs dream, but puppies and senior dogs dream more frequently than adult dogs");
+            fact.setText("Pneumonia is the world’s leading cause of death among " +
+                    "children under 5 years of age, accounting for 16% of all " +
+                    "deaths of children under 5 years old killing approximately " +
+                    "2,400 children a day in 2015");
         }else if(i == 3){
-            fact.setText("A dog’s sense of smell is legendary, but did you know that their nose has as many as 300 million receptors? In comparison, a human nose has about 5 million");
+            fact.setText("In the US, pneumonia is less often fatal for children, but " +
+                    "it is still a big problem");
         }else if(i == 4){
-            fact.setText("Dogs’ noses can sense heat and thermal radiation, which explains why blind or deaf dogs can still hunt");
+            fact.setText("For US adults, pneumonia is the most common cause " +
+                    "of hospital admissions other than women giving birth");
         }else if(i == 5){
-            fact.setText("Yawning is contagious — even for dogs. Research shows that the sound of a human yawn can trigger one from your dog. And it’s four times as likely to happen when it’s the yawn of a person your pet knows");
+            fact.setText("While young healthy adults have less risk of pneumonia " +
+                    "than the age extremes, it is always a threat");
         }else if(i == 6){
-            fact.setText("All puppies are born deaf.");
+            fact.setText("Older people have higher risk of getting pneumonia, " +
+                    "and are more likely to die from it if they do");
         }else if(i == 7){
-            fact.setText("Dogs have about 1,700 taste buds. We humans have between 2,000 and 10,000");
+            fact.setText("Pneumonia is the most common cause of sepsis and " +
+                    "septic shock, causing 50% of all episodes");
         }else if(i == 8){
-            fact.setText("When dogs kick backward after they go to the bathroom, it’s not to cover it up, but to mark their territory, using the scent glands in their feet");
+            fact.setText("Pneumonia can develop in patients already in the hospital " +
+                    "for other reasons");
         }else if(i == 9){
-            fact.setText("A study shows that dogs are among a small group of animals who show voluntary unselfish kindness towards others without any reward");
+            fact.setText("Pneumonia can be caused by lots of different types of " +
+                    "microbes, and no single one is responsible for as many as " +
+                    "10% of pneumonia cases");
         }else if(i == 10){
-            fact.setText("Greyhounds can beat cheetahs in a race. While cheetahs can run twice as fast as Greyhounds, they can only maintain that 70 mph speed for about thirty seconds. A Greyhound can maintain a 35 mph speed for about seven miles. The cheetah may start out first, but the Greyhound would soon overtake them");
+            fact.setText("Vaccines are available for some but not many causes of " +
+                    "pneumonia");
         }else if(i == 11){
-            fact.setText("According to Guinness World Records, a Great Dane named Zeus is the world’s tallest male dog. Zeus is 3 feet, 5.18 inches tall");
+            fact.setText("Antibiotics can be effective for many of the bacteria " +
+                    "that cause pneumonia");
         }else if(i == 12){
-            fact.setText("Human blood pressure goes down when petting a dog. And so does the dog’s");
+            fact.setText("Antibiotic resistance is growing amongst the bacteria " +
+                    "that cause pneumonia");
         }else if(i == 13){
-            fact.setText("The Australian Shepherd is not actually from Australia. In fact, they are an American breed");
+            fact.setText("Being on a ventilator raises especially high risk for " +
+                    "serious pneumonia");
         }
 
     }
